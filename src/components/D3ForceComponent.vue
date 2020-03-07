@@ -30,8 +30,19 @@
         flowers: [
           {
             name: 'Roses',
-            amount: 25,
-            color: '#cc2936'
+            amount: 3,
+            color: '#cc2936',
+            // children: [
+            //   {name: "child #1"},
+            //   {
+            //     name: "child #2",
+            //     children: [
+            //       {name: "grandchild #1"},
+            //       {name: "grandchild #2"},
+            //       {name: "grandchild #3"}
+            //     ]
+            //   }
+            // ]
           },
           {
             name: 'Tulips',
@@ -72,10 +83,10 @@
             return b.value - a.value
           })
 
+        console.log('pack', pack().size([500, 500]).padding(10)(rootHierarchy))
         // Pack the circles inside the viewbox
-        return pack()
-          .size([500, 500])
-          .padding(10)(rootHierarchy)
+        return pack().size([500, 500]).padding(10)(rootHierarchy)
+
       }
     }
   }
