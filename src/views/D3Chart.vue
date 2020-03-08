@@ -16,10 +16,8 @@
     computed: {
       ...mapState(['movieListForChart']),
       arrayToObject(){
-        debugger
         const newArray = this.movieListForChart.map((item) => {
           let movieArray = item.reduce((result, current) => {
-            debugger
             let movieInfoData = {
               name: current.title,
               amount: 3,
@@ -27,15 +25,15 @@
               movieInfo: current
             }
             result.decade = current.year
-            result.movies.push(movieInfoData)
-            debugger
+            result.name = current.title
+            result.children.push(movieInfoData)
+            result.amount = result.children.length
             return result
-          }, {decade: '', movies: []});
-          debugger
+          }, {decade: '', name: '', amount: null, color: '', children: []});
           return movieArray;
         });
-        console.log('reduce', newArray)
-        debugger
+        console.log('BeforeChange', this.movieListForChart)
+        console.log('AfterChange', newArray)
         return newArray
       },
       numberTopMovieInDecade() {
