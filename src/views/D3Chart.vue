@@ -19,18 +19,23 @@
         debugger
         const newArray = this.movieListForChart.map((item) => {
           let movieArray = item.reduce((result, current) => {
+            debugger
             let movieInfoData = {
               name: current.title,
               amount: 3,
-              color: '#00a03e'
+              color: '#00a03e',
+              movieInfo: current
             }
             result.decade = current.year
-            result.movieInfo = []
+            result.movies.push(movieInfoData)
+            debugger
             return result
-          }, {});
+          }, {decade: '', movies: []});
+          debugger
           return movieArray;
         });
         console.log('reduce', newArray)
+        debugger
         return newArray
       },
       numberTopMovieInDecade() {
