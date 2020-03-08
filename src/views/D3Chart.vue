@@ -24,12 +24,12 @@
               color: '#00a03e',
               movieInfo: current
             }
-            result.decade = current.year
+            result.decade = `${Math.min(current.year)}-th`
             result.name = current.title
             result.children.push(movieInfoData)
             result.amount = result.children.length
             return result
-          }, {decade: '', name: '', amount: null, color: '', children: []});
+          }, {decade: 'Decade', name: 'Bubble name', amount: 1, color: '#00a03e', children: []});
           return movieArray;
         });
         console.log('BeforeChange', this.movieListForChart)

@@ -56,6 +56,7 @@ export default new Vuex.Store({
             ]
           let movieListForChart = initial.reduce((result, current) => {
             let movieArray = state.movieList.filter(movie => movie.year >= current.min && movie.year <= current.max)
+            debugger
             result.push(movieArray)
             return result;
           }, []);
