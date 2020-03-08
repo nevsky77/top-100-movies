@@ -19,30 +19,24 @@
         <input type="number" v-model="flower.amount" step="10" min="10">
       </div>
     </div>
+    {{movieList}}
   </div>
 </template>
 
 <script>
+  import {mapState} from 'vuex'
   import { hierarchy, pack } from 'd3-hierarchy'
   export default {
+    props: {
+      movieList: Array
+    },
     data() {
       return {
         flowers: [
           {
             name: 'Roses',
-            amount: 3,
-            color: '#cc2936',
-            // children: [
-            //   {name: "child #1"},
-            //   {
-            //     name: "child #2",
-            //     children: [
-            //       {name: "grandchild #1"},
-            //       {name: "grandchild #2"},
-            //       {name: "grandchild #3"}
-            //     ]
-            //   }
-            // ]
+            amount: 30,
+            color: '#cc2936'
           },
           {
             name: 'Tulips',
@@ -53,16 +47,10 @@
             name: 'Daisies',
             amount: 15,
             color: '#2a93d4'
-          },
-          {
-            name: 'Narcissuses',
-            amount: 9,
-            color: '#F7AD0A'
           }
         ]
       }
     },
-
     computed: {
       transformedFlowerData() {
         return {
@@ -74,7 +62,6 @@
           }))
         }
       },
-
       layoutData() {
         // Generate a D3 hierarchy
         const rootHierarchy = hierarchy(this.transformedFlowerData)
@@ -83,12 +70,18 @@
             return b.value - a.value
           })
 
-        console.log('pack', pack().size([500, 500]).padding(10)(rootHierarchy))
+        // console.log('pack', pack().size([500, 500]).padding(10)(rootHierarchy).children)
         // Pack the circles inside the viewbox
         return pack().size([500, 500]).padding(10)(rootHierarchy)
 
+      },
+      movieInDecade(){
+        const count = this.movieListForChart.map((item) => {
+             return item.length
+           });
+           return count
       }
-    }
+    },
   }
 </script>
 

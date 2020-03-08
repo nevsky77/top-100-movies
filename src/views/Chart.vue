@@ -9,12 +9,12 @@
 <style>
 </style>
 <script>
-  import {mapState, mapGetters} from 'vuex'
-    import Chart from "../components/Chart";
-    export default {
-      components: {Chart},
-      computed: {
-        ...mapState(['movieListForChart'])
-      }
+  import Chart from "../components/Chart";
+  import {mapState} from 'vuex'
+  export default {
+    components: {Chart},
+    computed: {
+      ...mapState(['movieListForChart'])
     }
+  }
 </script>
