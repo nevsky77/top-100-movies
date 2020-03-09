@@ -1,25 +1,24 @@
 <template>
   <div>
-    <svg width="500" height="500">
+    <svg width="1000" height="1000">
       <g
-          class="flower"
-          v-for="flower in layoutData.children"
-          :key="flower.data.name"
+          class="decade"
+          v-for="decade in layoutData.children"
+          :key="decade.data.name"
           :style="{
-          transform: `translate(${flower.x}px, ${flower.y}px)`
+          transform: `translate(${decade.x}px, ${decade.y}px)`
         }"
       >
-        <circle class="flower__circle" :r="flower.r" :fill="flower.data.color"></circle>
-        <text class="flower__label">{{ flower.data.name }}</text>
+        <circle class="decade__circle" :r="decade.r" :fill="decade.data.color" :key="decade.decade"></circle>
+        <text class="decade__label">{{ decade.data.name }}</text>
       </g>
     </svg>
-    <div class="controls">
-      <div class="control" v-for="flower in flowers" :key="flower.name">
-        <label>{{ flower.name }}</label>
-        <input type="number" v-model="flower.amount" step="10" min="10">
-      </div>
-    </div>
-    {{movieList}}
+<!--    <div class="controls">-->
+<!--      <div class="control" v-for="decade in decades" :key="decade.name">-->
+<!--        <label>{{ decade.name }}</label>-->
+<!--        <input type="number" v-model="decade.amount" step="10" min="10">-->
+<!--      </div>-->
+<!--    </div>-->
   </div>
 </template>
 
@@ -32,39 +31,39 @@
     },
     data() {
       return {
-        flowers: [
-          {
-            name: 'Roses',
-            amount: 30,
-            color: '#cc2936'
-          },
-          {
-            name: 'Tulips',
-            amount: 40,
-            color: '#00a03e'
-          },
-          {
-            name: 'Daisies',
-            amount: 15,
-            color: '#2a93d4'
-          }
-        ]
+        // decades: [
+        //   {
+        //     name: 'Roses',
+        //     amount: 30,
+        //     color: '#cc2936'
+        //   },
+        //   {
+        //     name: 'Tulips',
+        //     amount: 40,
+        //     color: '#00a03e'
+        //   },
+        //   {
+        //     name: 'Daisies',
+        //     amount: 15,
+        //     color: '#2a93d4'
+        //   }
+        // ]
       }
     },
     computed: {
-      transformedFlowerData() {
+      transformeddecadeData() {
         return {
           name: 'Top Level',
-          children: this.flowers.map(flower => ({
-            ...flower,
-            size: flower.amount,
+          children: this.movieList.map(decade => ({
+            ...decade,
+            size: decade.amount,
             parent: 'Top Level'
           }))
         }
       },
       layoutData() {
         // Generate a D3 hierarchy
-        const rootHierarchy = hierarchy(this.transformedFlowerData)
+        const rootHierarchy = hierarchy(this.transformeddecadeData)
           .sum(d => d.size)
           .sort((a, b) => {
             return b.value - a.value
@@ -72,14 +71,8 @@
 
         // console.log('pack', pack().size([500, 500]).padding(10)(rootHierarchy).children)
         // Pack the circles inside the viewbox
-        return pack().size([500, 500]).padding(10)(rootHierarchy)
+        return pack().size([1000, 1000]).padding(10)(rootHierarchy)
 
-      },
-      movieInDecade(){
-        const count = this.movieListForChart.map((item) => {
-             return item.length
-           });
-           return count
       }
     },
   }
@@ -96,16 +89,16 @@
     margin: 0 auto;
   }
 
-  .flower {
+  .decade {
     transition: transform 0.2s ease-in-out;
     text-anchor: middle;
   }
 
-  .flower__circle {
+  .decade__circle {
     transition: r 0.2s ease-in-out;
   }
 
-  .flower__label {
+  .decade__label {
     fill: #fff;
     font-weight: bold;
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
