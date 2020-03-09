@@ -21,7 +21,7 @@
             let movieInfoData = {
               name: current.title,
               amount: 3,
-              color: '#00a03e',
+              color: '#9afbbf',
               movieInfo: current
             }
             result.id = current.id
@@ -30,11 +30,9 @@
             result.elements.push(movieInfoData)
             result.amount = result.elements.length
             return result
-          }, {decade: 'Decade', id: null, name: 'Empty Bubble', amount: 1, color: '#00a03e', elements: [],/*children: []*/});
+          }, {decade: 'Decade', id: null, name: 'Empty Bubble', amount: 1, color: '#72c391', elements: [],/*children: []*/});
           return movieArray;
         });
-        console.log('BeforeChange', this.movieListForBubble)
-        console.log('AfterChange', newArray)
         return newArray
       }
     }

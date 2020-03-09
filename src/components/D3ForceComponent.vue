@@ -1,31 +1,27 @@
 <template>
   <div>
-    <svg width="1000" height="1000">
+    <svg ref="bubble-chart" width="800" height="800">
       <g
           class="decade"
+          :id="decade.data.id"
           v-for="decade in layoutData.children"
-          :key="decade.data.name"
+          :key="decade.data.id"
           :style="{
           transform: `translate(${decade.x}px, ${decade.y}px)`
         }"
       >
         <circle class="decade__circle" :r="decade.r" :fill="decade.data.color" :key="decade.id">
-          {{decade.elements}}
         </circle>
-        <text class="decade__label">{{ decade.data.name }}</text>
+        <text class="decade__label">{{decade.data.elements.length}} top film in {{ decade.data.name }}
+        </text>
       </g>
     </svg>
-<!--    <div class="controls">-->
-<!--      <div class="control" v-for="decade in decades" :key="decade.name">-->
-<!--        <label>{{ decade.name }}</label>-->
-<!--        <input type="number" v-model="decade.amount" step="10" min="10">-->
-<!--      </div>-->
-<!--    </div>-->
   </div>
 </template>
 
 <script>
   import {mapState} from 'vuex'
+  import * as dd from "d3"
   import { hierarchy, pack } from 'd3-hierarchy'
   export default {
     props: {
@@ -56,17 +52,14 @@
             return b.value - a.value
           })
 
-        console.log('pack', pack().size([500, 500]).padding(10)(rootHierarchy).children)
         // Pack the circles inside the viewbox
-        return pack().size([1000, 1000]).padding(10)(rootHierarchy)
+        return pack().size([800, 800]).padding(10)(rootHierarchy)
 
       }
     },
-    mounted() {
-      let widht = document.body.clientWidth
-      let height = document.body.clientHeight
-      console.log('width', widht)
-      console.log('height', height)
+    methods: {
+    },
+    created() {
     }
   }
 </script>
@@ -92,9 +85,12 @@
   }
 
   .decade__label {
-    fill: #fff;
-    font-weight: bold;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    fill: #9c9c9c;
+    text-shadow:
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000;
   }
 
   .controls {

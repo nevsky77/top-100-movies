@@ -191,8 +191,5 @@ export default {
       this.$store.dispatch('reverseMoviesList')
     }
   },
-  mounted() {
-    console.log('PosterSize', this.posterSize)
-  }
 }
 </script>
