@@ -1,6 +1,6 @@
 <template>
   <div v-if="movieListForChart.length">
-    <chart :movieListForChart="movieListForChart"></chart>
+    <chart :dataForChart="movieListForChart"></chart>
   </div>
   <div v-else class="spinner-border text-success" role="status">
     <span class="sr-only">Loading...</span>

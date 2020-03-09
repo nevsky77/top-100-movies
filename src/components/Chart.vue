@@ -4,11 +4,11 @@ import { Bar } from "vue-chartjs";
 export default {
     extends: Bar,
     props: {
-      movieListForChart: Array
+      dataForChart: Array
     },
     mounted() {
       let numberTopMovieInDecade = () => {
-        const count = this.movieListForChart.map((item) => {
+        const count = this.dataForChart.map((item) => {
           return item.length
         });
         return count

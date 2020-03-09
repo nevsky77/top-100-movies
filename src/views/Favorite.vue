@@ -5,7 +5,7 @@
      <div v-for="movie in favoriteList"
           :key="movie.idIMDB"
      >
-       <div class="shadow-sm py-2">
+       <div class="shadow-sm py-2 h-100">
          <div class="title py-2">
            <h5 v-cut-title>{{movie.title}}</h5>
          </div>

@@ -21,16 +21,15 @@
             let movieInfoData = {
               name: current.title,
               amount: 3,
-              color: '#9afbbf',
+              color: '#72c391',
               movieInfo: current
             }
-            result.id = current.id
             result.decade = current.decade
             result.name = current.decade
             result.elements.push(movieInfoData)
             result.amount = result.elements.length
             return result
-          }, {decade: 'Decade', id: null, name: 'Empty Bubble', amount: 1, color: '#72c391', elements: [],/*children: []*/});
+          }, {decade: 'Decade', name: 'Bubble name', amount: 1, color: '#72c391', elements: []/*children: []*/});
           return movieArray;
         });
         return newArray
