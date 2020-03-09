@@ -9,7 +9,9 @@
           transform: `translate(${decade.x}px, ${decade.y}px)`
         }"
       >
-        <circle class="decade__circle" :r="decade.r" :fill="decade.data.color" :key="decade.decade"></circle>
+        <circle class="decade__circle" :r="decade.r" :fill="decade.data.color" :key="decade.id">
+          {{decade.elements}}
+        </circle>
         <text class="decade__label">{{ decade.data.name }}</text>
       </g>
     </svg>
@@ -27,34 +29,19 @@
   import { hierarchy, pack } from 'd3-hierarchy'
   export default {
     props: {
-      movieList: Array
+      dataForBubbleChart: Array
     },
     data() {
       return {
-        // decades: [
-        //   {
-        //     name: 'Roses',
-        //     amount: 30,
-        //     color: '#cc2936'
-        //   },
-        //   {
-        //     name: 'Tulips',
-        //     amount: 40,
-        //     color: '#00a03e'
-        //   },
-        //   {
-        //     name: 'Daisies',
-        //     amount: 15,
-        //     color: '#2a93d4'
-        //   }
-        // ]
+        width: null,
+        height: null
       }
     },
     computed: {
       transformeddecadeData() {
         return {
           name: 'Top Level',
-          children: this.movieList.map(decade => ({
+          children: this.dataForBubbleChart.map(decade => ({
             ...decade,
             size: decade.amount,
             parent: 'Top Level'
@@ -69,12 +56,18 @@
             return b.value - a.value
           })
 
-        // console.log('pack', pack().size([500, 500]).padding(10)(rootHierarchy).children)
+        console.log('pack', pack().size([500, 500]).padding(10)(rootHierarchy).children)
         // Pack the circles inside the viewbox
         return pack().size([1000, 1000]).padding(10)(rootHierarchy)
 
       }
     },
+    mounted() {
+      let widht = document.body.clientWidth
+      let height = document.body.clientHeight
+      console.log('width', widht)
+      console.log('height', height)
+    }
   }
 </script>
 

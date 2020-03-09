@@ -9,7 +9,8 @@ export default new Vuex.Store({
     movieList: [],
     sortedMovieList: [],
     favoriteList: [],
-    movieListForChart: []
+    movieListForChart: [],
+    movieListForBubble: []
   },
   mutations: {
     setMoviesList(state, {movieList}) {
@@ -29,6 +30,9 @@ export default new Vuex.Store({
     },
     setMovieListForChart(state, movieListForChart){
       state.movieListForChart = movieListForChart
+    },
+    setMovieListForBubble(state, movieListForBubble) {
+      state.movieListForBubble = movieListForBubble
     }
   },
   actions: {
@@ -41,7 +45,7 @@ export default new Vuex.Store({
           commit('setMoviesList', { movieList });
           commit('setSortedByDecadeMovieList', movieList);
         }
-        let sortMoviesArrayForChart = async () => {
+        let sortMoviesArrayForCharts = async () => {
           let initial = [
             {decade: '1920-th', min: 1920, max: 1929},
             {decade: '1930-th', min: 1930, max: 1939},
@@ -55,35 +59,46 @@ export default new Vuex.Store({
             {decade: '2010-th', min: 2010, max: 2019},
             {decade: '2020-th', min: 2020, max: 2029}
             ]
+
           let movieListForChart = initial.reduce((result, current) => {
-            const filteredMovieList = () => {
-              let movieArray = state.movieList.filter(movie => movie.year >= current.min && movie.year <= current.max)
-              if (!movieArray.length) {
-                let addDecadeToEmptyArray = {
-                  decade: current.decade
-                }
-                movieArray.push(addDecadeToEmptyArray)
-                return movieArray
-              }
-              return movieArray
+            const filteredMovieListForChart = () => {
+              let movieArrayForChart = state.movieList.filter(movie => movie.year >= current.min && movie.year <= current.max)
+              return movieArrayForChart
             }
-            let newArray = filteredMovieList().map(decade => {
+            result.push(filteredMovieListForChart())
+            return result;
+          }, []);
+
+          let movieListForBubble = initial.reduce((result, current) => {
+            const filteredMovieListForBubble = () => {
+              let movieArrayForBubble = state.movieList.filter(movie => movie.year >= current.min && movie.year <= current.max)
+              if (!movieArrayForBubble.length) {
+                let addDecadeToEmptyArray = {
+                  decade: current.decade,
+                }
+
+                movieArrayForBubble.push(addDecadeToEmptyArray)
+                return movieArrayForBubble
+              }
+              return movieArrayForBubble
+            }
+            let changedMovieListForBubble = filteredMovieListForBubble().map(decade => {
               let newFormatMovieData = {
                 decade: current.decade,
+                id: Math.floor(Math.random() * Math.floor(999)),
                 ...decade,
               }
               return newFormatMovieData
             })
-            console.log('newMovieArrayInStart', newArray)
-
-            result.push(newArray)
+            result.push(changedMovieListForBubble)
             return result;
-          }, []);
+          }, [])
           commit('setMovieListForChart', movieListForChart)
+          commit('setMovieListForBubble', movieListForBubble)
           return
         };
         await fetchMovieList()
-        await sortMoviesArrayForChart()
+        await sortMoviesArrayForCharts()
       } catch (e) {
         console.log('error', e)
       }

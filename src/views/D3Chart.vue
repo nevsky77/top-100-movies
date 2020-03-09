@@ -1,6 +1,6 @@
 <template>
-  <div v-if="movieListForChart.length">
-    <d3-force-component :movieList="movieInDecade"></d3-force-component>
+  <div v-if="movieListForBubble.length">
+    <d3-force-component :dataForBubbleChart="dataForBubbleChart"></d3-force-component>
   </div>
   <div v-else class="spinner-border text-success" role="status">
     <span class="sr-only">Loading...</span>
@@ -14,9 +14,9 @@
     name: "D3Chart",
     components: {D3ForceComponent},
     computed: {
-      ...mapState(['movieListForChart']),
-      movieInDecade(){
-        const newArray = this.movieListForChart.map((item) => {
+      ...mapState(['movieListForBubble']),
+      dataForBubbleChart(){
+        const newArray = this.movieListForBubble.map((item) => {
           let movieArray = item.reduce((result, current) => {
             let movieInfoData = {
               name: current.title,
@@ -24,15 +24,16 @@
               color: '#00a03e',
               movieInfo: current
             }
+            result.id = current.id
             result.decade = current.decade
             result.name = current.decade
             result.elements.push(movieInfoData)
             result.amount = result.elements.length
             return result
-          }, {decade: 'Decade', name: 'Bubble name', amount: 1, color: '#00a03e', elements: [],/*children: []*/});
+          }, {decade: 'Decade', id: null, name: 'Empty Bubble', amount: 1, color: '#00a03e', elements: [],/*children: []*/});
           return movieArray;
         });
-        console.log('BeforeChange', this.movieListForChart)
+        console.log('BeforeChange', this.movieListForBubble)
         console.log('AfterChange', newArray)
         return newArray
       }
