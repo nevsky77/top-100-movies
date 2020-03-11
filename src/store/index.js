@@ -73,11 +73,8 @@ export default new Vuex.Store({
             const filteredMovieListForBubble = () => {
               let movieArrayForBubble = state.movieList.filter(movie => movie.year >= current.min && movie.year <= current.max)
               if (!movieArrayForBubble.length) {
-                let addDecadeToEmptyArray = {
-                  decade: current.decade,
-                }
-
-                movieArrayForBubble.push(addDecadeToEmptyArray)
+                let dec = current.decade
+                movieArrayForBubble.push(current.decade)
                 return movieArrayForBubble
               }
               return movieArrayForBubble

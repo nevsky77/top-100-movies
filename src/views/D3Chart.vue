@@ -27,7 +27,7 @@
             result.decade = current.decade
             result.name = current.decade
             result.elements.push(movieInfoData)
-            result.amount = result.elements.length
+            result.amount = result.elements[0].name ? 0 : result.elements.length
             return result
           }, {decade: 'Decade', name: 'Bubble name', amount: 1, color: '#72c391', elements: []/*children: []*/});
           return movieArray;
