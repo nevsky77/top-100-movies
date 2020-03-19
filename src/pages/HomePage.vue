@@ -37,7 +37,7 @@
 <script>
 // @ is an alias to /src
 import {mapState} from 'vuex'
-import MovieItemComponent from "../components/movieItemComponent";
+import MovieItemComponent from "../components/MovieItemComponent";
 export default {
   name: 'home',
     components: {MovieItemComponent},

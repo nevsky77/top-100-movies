@@ -1,6 +1,5 @@
 <template>
-  <div>
-    <div class="shadow-sm py-2 h-100">
+    <div class="shadow-sm py-2 h-100 text-center">
       <div class="title">
 <!--        <h5 v-cut-title></h5>-->
         <router-link tag="h5" :to="{path: `movie/${movieInfo.idIMDB}`}">{{movieInfo.title}}</router-link>
@@ -17,12 +16,11 @@
         <b-btn variant="outline-warning" @click="addToFavorite(movieInfo)">To favorite</b-btn>
       </div>
     </div>
-  </div>
 </template>
 
 <script>
   export default {
-    name: "movieItemComponent",
+    name: "MovieItemComponent",
     props: {
       movieInfo: Object
     },
