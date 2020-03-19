@@ -1,10 +1,10 @@
 <template>
-  <div v-if="movieListForBubble.length">
+  <div>
     <d3-force-component :dataForBubbleChart="dataForBubbleChart"></d3-force-component>
   </div>
-  <div v-else class="spinner-border text-success" role="status">
-    <span class="sr-only">Loading...</span>
-  </div>
+<!--  <div v-else class="spinner-border text-success" role="status">-->
+<!--    <span class="sr-only">Loading...</span>-->
+<!--  </div>-->
 </template>
 
 <script>

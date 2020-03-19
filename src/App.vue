@@ -4,7 +4,7 @@
       <router-link to="/">Home</router-link> |
       <router-link to="/favorite">Favorites</router-link> |
       <router-link to="/chart">Chart</router-link> |
-      <router-link to="/d3-chart">D3 Chart</router-link>
+      <router-link to="/movie">Film</router-link>
     </div>
     <div v-if="movieList.length">
       <router-view/>

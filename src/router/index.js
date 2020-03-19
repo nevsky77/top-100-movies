@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
-import BubbleChart from '../views/D3Chart.vue'
+import Home from '../pages/HomePage.vue'
+import BubbleChart from '../pages/D3ChartPage.vue'
 
 Vue.use(VueRouter)
 
@@ -11,13 +11,17 @@ const routes = [
     name: 'home',
     component: Home
   },
+  { path: '/movie/:id',
+    name: 'movie',
+    component: () => import(/* webpackChunkName: "about" */ '../pages/MoviePage.vue')
+  },
   {
     path: '/favorite',
     name: 'favorite',
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/Favorite.vue')
+    component: () => import(/* webpackChunkName: "about" */ '../pages/FavoritePage.vue')
   },
   {
     path: '/chart',
@@ -25,7 +29,7 @@ const routes = [
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/Chart.vue')
+    component: () => import(/* webpackChunkName: "about" */ '../pages/ChartPage.vue')
   },
   {
     path: '/d3-chart',

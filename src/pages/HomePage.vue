@@ -21,27 +21,12 @@
 
     <template v-if="sortedMovieList.length">
       <div class="home">
-        <div
-                v-for="movie in sortedMovieList"
-                :key="movie.idIMDB"
-        >
-          <div class="shadow-sm py-2 h-100">
-            <div class="title">
-              <h5 v-cut-title>{{movie.title}}</h5>
-            </div>
-            <div>
-              <img class="image w-75" :src="movie.urlPoster" alt="moviePoster">
-              <div>
-                <span><strong>Rating: {{movie.rating}}</strong></span>
-                <br>
-                <span><strong>Year: {{movie.year}}</strong></span>
-              </div>
-            </div>
-            <div>
-              <b-btn variant="outline-warning" @click="addToFavorite(movie)">To favorite</b-btn>
-            </div>
-          </div>
-        </div>
+        <movie-item-component
+          v-for="movie in sortedMovieList"
+          :key="movie.idIMDB"
+          :movieInfo="movie"
+          @makeToast="makeToast"
+        ></movie-item-component>
       </div>
     </template>
     <template v-else>
@@ -49,53 +34,14 @@
     </template>
   </div>
 </template>
-<style lang="scss">
-  .caret{
-    margin: 8px;
-    border-bottom: 10px solid #42b983;
-    border-left: 6px solid rgba(0, 0, 0, 0);
-    border-right: 6px solid rgba(0, 0, 0, 0);
-    content: "";
-    display: inline-block;
-    height: 0;
-    vertical-align: top;
-    width: 0;
-    &-down{
-      transform: rotate(180deg);
-    }
-  }
-  .home {
-    padding: 0 25px;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-gap: 2rem;
-  }
-  .image {
-    max-height: 300px;
-    height: 100%;
-  }
-  .favourite-icon {
-    background-color: yellow;
-    cursor: pointer;
-    font-size: 50px;
-  }
-  @media (max-width: 600px) {
-    .home {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-  @media (max-width: 600px) {
-    .home {
-      grid-template-columns: 1fr;
-    }
-  }
-</style>
 <script>
 // @ is an alias to /src
 import {mapState} from 'vuex'
+import MovieItemComponent from "../components/movieItemComponent";
 export default {
   name: 'home',
-  data () {
+    components: {MovieItemComponent},
+    data () {
     return {
       urlMoviePoster: 'UY320_CR1,0,220,320_AL_.jpg',
       decades: [
@@ -165,10 +111,6 @@ export default {
     sortByDecade(value){
       this.$store.dispatch('sortMovieListByDecades', value)
     },
-    addToFavorite(item){
-      this.makeToast(item)
-      this.$store.dispatch('addToFavourite', item.idIMDB)
-    },
     makeToast(item) {
       let existFilm = this.favoriteList.find(movie => {
         return movie.idIMDB === item.idIMDB
@@ -190,6 +132,47 @@ export default {
       this.caretReverse = !this.caretReverse
       this.$store.dispatch('reverseMoviesList')
     }
-  },
+  }
 }
 </script>
+<style lang="scss">
+  .caret{
+    margin: 8px;
+    border-bottom: 10px solid #42b983;
+    border-left: 6px solid rgba(0, 0, 0, 0);
+    border-right: 6px solid rgba(0, 0, 0, 0);
+    content: "";
+    display: inline-block;
+    height: 0;
+    vertical-align: top;
+    width: 0;
+    &-down{
+      transform: rotate(180deg);
+    }
+  }
+  .home {
+    padding: 0 25px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-gap: 2rem;
+  }
+  .image {
+    max-height: 300px;
+    height: 100%;
+  }
+  .favourite-icon {
+    background-color: yellow;
+    cursor: pointer;
+    font-size: 50px;
+  }
+  @media (max-width: 600px) {
+    .home {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (max-width: 600px) {
+    .home {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

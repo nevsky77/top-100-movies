@@ -1,146 +1,394 @@
 <template>
-  <div id="app">
-    <svg xmlns="http://www.w3.org/2000/svg"
-         :width="width+'px'"
-         :height="height+'px'"
-         @mousemove="drag($event)"
-         @mouseup="drop()"
-         v-if="bounds.minX">
-
-      <line v-for="link in graph.links"
-            :x1="coords[link.source.index].x"
-            :y1="coords[link.source.index].y"
-            :x2="coords[link.target.index].x"
-            :y2="coords[link.target.index].y"
-            stroke="black" stroke-width="2"/>
-
-      <circle v-for="(node, i) in graph.nodes"
-              :cx="coords[i].x"
-              :cy="coords[i].y"
-              :r="20" :fill="colors[Math.ceil(Math.sqrt(node.index))]"
-              stroke="white" stroke-width="1"
-              @mousedown="currentMove = {x: $event.screenX, y: $event.screenY, node: node}"/>
-
+  <div :style="{ width: width + 'px', height: height + 'px', border: '1px solid black' }">
+    <svg width="100%" height="100%">
+      <defs>
+        <pattern id="innerGrid" :width="innerGridSize" :height="innerGridSize" patternUnits="userSpaceOnUse">
+          <rect width="100%" height="100%" fill="none" stroke="#CCCCCC7A" stroke-width="0.5"/>
+        </pattern>
+        <pattern id="grid" :width="gridSize" :height="gridSize" patternUnits="userSpaceOnUse">
+          <rect width="100%" height="100%" fill="url(#innerGrid)" stroke="#CCCCCC7A" stroke-width="1.5"/>
+        </pattern>
+      </defs>
     </svg>
   </div>
 </template>
 
 <script>
-  import {mapState} from 'vuex'
-  import * as d3 from 'd3'
+  import * as d3 from "d3";
   export default {
-    props: {
-      dataForBubbleChart: Array
-    },
-    data () {
+    name: "PackChart",
+    props: ["tweetData"],
+    data() {
       return {
-        graph: {
-          nodes: d3.range(100).map(i => ({ index: i, x: null, y: null })),
-          links: d3.range(99).map(i => ({ source: Math.floor(Math.sqrt(i)), target: i + 1 }))
-        },
-        width: Math.max(document.documentElement.clientWidth, window.innerWidth || 0),
-        height: Math.max(document.documentElement.clientHeight, window.innerHeight || 0) - 40,
-        padding: 20,
-        colors: ['#06f3e3', '#e9e200', '#0e0bc2', '#099600', '#00BCD4', '#EF6C00', '#4CAF50', '#FF9800', '#F44336', '#CDDC39', '#9C27B0'],
+        width: 1024,
+        height: 768,
+        gridSize: 100,
+        selections: {},
         simulation: null,
-        currentMove: null
+        forceProperties: {
+          center: {
+            x: 0.5,
+            y: 0.5
+          },
+          charge: {
+            enabled: true,
+            strength: -700,
+            distanceMin: 1,
+            distanceMax: 2000
+          },
+          collide: {
+            enabled: true,
+            strength: .7,
+            iterations: 1,
+            radius: 35
+          },
+          forceX: {
+            enabled: true,
+            strength: 0.05,
+            x: 0.5
+          },
+          forceY: {
+            enabled: true,
+            strength: 0.35,
+            y: 0.5
+          },
+          link: {
+            enabled: true,
+            distance: 100,
+            iterations: 1
+          }
+        }
       }
     },
     computed: {
-      bounds() {
-        return {
-          minX: Math.min(...this.graph.nodes.map(n => n.x)),
-          maxX: Math.max(...this.graph.nodes.map(n => n.x)),
-          minY: Math.min(...this.graph.nodes.map(n => n.y)),
-          maxY: Math.max(...this.graph.nodes.map(n => n.y))
-        }
-      },
-      coords() {
-        return this.graph.nodes.map(node => {
-          return {
-            x: this.padding + (node.x - this.bounds.minX) * (this.width - 2*this.padding) / (this.bounds.maxX - this.bounds.minX),
-            y: this.padding + (node.y - this.bounds.minY) * (this.height - 2*this.padding) / (this.bounds.maxY - this.bounds.minY)
-          }
+      innerGridSize() { return this.gridSize / 10 },
+      nodes() { return this.data.nodes },
+      links() { return this.data.links },
+      // These are needed for captions
+      linkTypes() {
+        const linkTypes = []
+        this.links.forEach(link => {
+          if (linkTypes.indexOf(link.type) === -1)
+            linkTypes.push(link.type)
         })
-      }
-    },
-    created(){
-      this.simulation = d3.forceSimulation(this.graph.nodes)
-        .force('charge', d3.forceManyBody().strength(d => -100))
-        .force('link', d3.forceLink(this.graph.links))
-        .force('x', d3.forceX())
-        .force('y', d3.forceY())
+        return linkTypes.sort()
+      },
+      classes() {
+        const classes = []
+        this.nodes.forEach(node => {
+          if (classes.indexOf(node.class) === -1)
+            classes.push(node.class)
+        })
+        return classes.sort()
+      },
     },
     methods: {
-      drag(e) {
-        if (this.currentMove) {
-          this.currentMove.node.fx = this.currentMove.node.x - (this.currentMove.x - e.screenX) * (this.bounds.maxX - this.bounds.minX) / (this.width - 2 * this.padding)
-          this.currentMove.node.fy = this.currentMove.node.y -(this.currentMove.y - e.screenY) * (this.bounds.maxY - this.bounds.minY) / (this.height - 2 * this.padding)
-          this.currentMove.x = e.screenX
-          this.currentMove.y = e.screenY
+      tick() {
+        // If no data is passed to the Vue component, do nothing
+        if (!this.data) { return }
+        const transform = d => {
+          return "translate(" + d.x + "," + d.y + ")"
         }
+
+        const link = d => {
+          // Self-link support
+          if (d.source.index === d.target.index) {
+            return `M${d.source.x-1},${d.source.y-1}A30,30 -10,1,0 ${d.target.x+1},${d.target.y+1}`;
+          } else {
+            return "M" + d.source.x + "," + d.source.y + " L" + d.target.x + "," + d.target.y;
+          }
+        }
+
+        const graph = this.selections.graph
+        graph.selectAll("path").attr("d", link)
+        graph.selectAll("circle").attr("transform", transform)
+        graph.selectAll("text").attr("transform", transform)
+
+        this.updateNodeLinkCount()
       },
-      drop(){
-        delete this.currentMove.node.fx
-        delete this.currentMove.node.fy
-        this.currentMove = null
-        this.simulation.alpha(1)
+      updateData() {
+        this.simulation.nodes(this.nodes)
+        this.simulation.force("link").links(this.links)
+
+        const simulation = this.simulation
+        const graph = this.selections.graph
+
+        // Links should only exit if not needed anymore
+        graph.selectAll("path")
+          .data(this.links)
+          .exit().remove()
+
+        graph.selectAll("path")
+          .data(this.links)
+          .enter().append("path")
+          .attr("class", d => "link " + d.type)
+
+        // Nodes should always be redrawn to avoid lines above them
+        graph.selectAll("circle").remove()
+        graph.selectAll("circle")
+          .data(this.nodes)
+          .enter().append("circle")
+          .attr("r", 30)
+          .attr("class", d => d.class)
+          .call(d3.drag()
+            .on('start', this.nodeDragStarted)
+            .on('drag', this.nodeDragged)
+            .on('end', this.nodeDragEnded))
+          .on('mouseover', this.nodeMouseOver)
+          .on('mouseout', this.nodeMouseOut)
+          .on('click', this.nodeClick)
+
+        graph.selectAll("text").remove()
+        graph.selectAll("text")
+          .data(this.nodes)
+          .enter().append("text")
+          .attr("x", 0)
+          .attr("y", ".31em")
+          .attr("text-anchor", "middle")
+          .text(d => d.name)
+
+        // Add 'marker-end' attribute to each path
+        const svg = d3.select(this.$el.querySelector("svg"))
+        svg.selectAll("g").selectAll("path").attr("marker-end", d => {
+          // Caption items doesn't have source and target
+          if (d.source && d.target &&
+            d.source.index === d.target.index) return "url(#end-self)";
+          else return "url(#end)";
+        });
+
+        // Update caption every time data changes
+        this.updateCaption()
+        simulation.alpha(1).restart()
+      },
+      updateForces() {
+        const { simulation, forceProperties, width, height } = this
+        simulation.force("center")
+          .x(width * forceProperties.center.x)
+          .y(height * forceProperties.center.y)
+        simulation.force("charge")
+          .strength(forceProperties.charge.strength * forceProperties.charge.enabled)
+          .distanceMin(forceProperties.charge.distanceMin)
+          .distanceMax(forceProperties.charge.distanceMax)
+        simulation.force("collide")
+          .strength(forceProperties.collide.strength * forceProperties.collide.enabled)
+          .radius(forceProperties.collide.radius)
+          .iterations(forceProperties.collide.iterations)
+        simulation.force("forceX")
+          .strength(forceProperties.forceX.strength * forceProperties.forceX.enabled)
+          .x(width * forceProperties.forceX.x)
+        simulation.force("forceY")
+          .strength(forceProperties.forceY.strength * forceProperties.forceY.enabled)
+          .y(height * forceProperties.forceY.y)
+        simulation.force("link")
+          .distance(forceProperties.link.distance)
+          .iterations(forceProperties.link.iterations)
+
+        // updates ignored until this is run
+        // restarts the simulation (important if simulation has already slowed down)
+        simulation.alpha(1).restart()
+      },
+      updateNodeLinkCount() {
+        let nodeCount = this.nodes.length;
+        let linkCount = this.links.length;
+
+        const highlightedNodes = this.selections.graph.selectAll("circle.highlight");
+        const highlightedLinks = this.selections.graph.selectAll("path.highlight");
+        if (highlightedNodes.size() > 0 || highlightedLinks.size() > 0) {
+          nodeCount = highlightedNodes.size()
+          linkCount = highlightedLinks.size()
+        }
+        this.selections.stats.text('Nodes: ' + nodeCount + ' / Edges: ' + linkCount);
+      },
+      updateCaption() {
+        // WARNING: Some gross math will happen here!
+        const lineHeight = 30
+        const lineMiddle = (lineHeight / 2)
+        const captionXPadding = 28
+        const captionYPadding = 5
+
+        const caption = this.selections.caption;
+        caption.select('rect')
+          .attr('height', (captionYPadding * 2) + lineHeight *
+            (this.classes.length + this.linkTypes.length))
+
+        const linkLine = (d) => {
+          const source = {
+            x: captionXPadding + 13,
+            y: captionYPadding + (lineMiddle + 1) + (lineHeight * this.linkTypes.indexOf(d)),
+          }
+          const target = {
+            x: captionXPadding - 10,
+          }
+          return 'M' + source.x + ',' + source.y + 'H' + target.x
+        }
+
+        caption.selectAll('g').remove();
+        const linkCaption = caption.append('g');
+        linkCaption.selectAll('path')
+          .data(this.linkTypes)
+          .enter().append('path')
+          .attr('d', linkLine)
+          .attr('class', (d) => 'link ' + d)
+
+        linkCaption.selectAll('text')
+          .data(this.linkTypes)
+          .enter().append('text')
+          .attr('x', captionXPadding + 20)
+          .attr('y', (d) => captionYPadding + (lineMiddle + 5) +
+            (lineHeight * this.linkTypes.indexOf(d)))
+          .attr('class', 'caption')
+          .text((d) => d);
+
+        const classCaption = caption.append('g');
+        classCaption.selectAll('circle')
+          .data(this.classes)
+          .enter().append('circle')
+          .attr('r', 10)
+          .attr('cx', captionXPadding - 2)
+          .attr('cy', (d) => captionYPadding + lineMiddle +
+            (lineHeight * (this.linkTypes.length + this.classes.indexOf(d))))
+          .attr('class', (d) => d.toLowerCase());
+
+        classCaption.selectAll('text')
+          .data(this.classes)
+          .enter().append('text')
+          .attr('x', captionXPadding + 20)
+          .attr('y', (d) => captionYPadding + (lineMiddle + 5) +
+            (lineHeight * (this.linkTypes.length + this.classes.indexOf(d))))
+          .attr('class', 'caption')
+          .text((d) => d);
+
+        const captionWidth = caption.node().getBBox().width;
+        const captionHeight = caption.node().getBBox().height;
+        const paddingX = 18;
+        const paddingY = 12;
+        caption
+          .attr('transform', 'translate(' +
+            (this.width - captionWidth - paddingX) + ', ' +
+            (this.height - captionHeight - paddingY) + ')');
+      },
+      zoomed() {
+        const transform = d3.event.transform
+        // The trick here is to move the grid in a way that the user doesn't perceive
+        // that the axis aren't really moving
+        // The actual movement is between 0 and gridSize only for x and y
+        const translate = transform.x % (this.gridSize * transform.k) + ',' +
+          transform.y % (this.gridSize * transform.k)
+        this.selections.grid.attr('transform', 'translate(' +
+          translate + ') scale(' + transform.k + ')')
+        this.selections.graph.attr('transform', transform)
+
+        // Define some world boundaries based on the graph total size
+        // so we don't scroll indefinitely
+        const graphBox = this.selections.graph.node().getBBox()
+        const margin = 200
+        const worldTopLeft = [graphBox.x - margin, graphBox.y - margin]
+        const worldBottomRight = [
+          graphBox.x + graphBox.width + margin,
+          graphBox.y + graphBox.height + margin
+        ]
+        this.zoom.translateExtent([worldTopLeft, worldBottomRight])
+      },
+      nodeDragStarted(d) {
+        if (!d3.event.active) { this.simulation.alphaTarget(0.3).restart() }
+        d.fx = d.x
+        d.fy = d.y
+      },
+      nodeDragged(d) {
+        d.fx = d3.event.x
+        d.fy = d3.event.y
+      },
+      nodeDragEnded(d) {
+        if (!d3.event.active) { this.simulation.alphaTarget(0.0001) }
+        d.fx = null
+        d.fy = null
+      },
+      nodeMouseOver(d) {
+        const graph = this.selections.graph
+        const circle = graph.selectAll("circle")
+        const path = graph.selectAll("path")
+        const text = graph.selectAll("text")
+
+        const related = []
+        const relatedLinks = []
+        related.push(d)
+        this.simulation.force('link').links().forEach((link) => {
+          if (link.source === d || link.target === d) {
+            relatedLinks.push(link)
+            if (related.indexOf(link.source) === -1) { related.push(link.source) }
+            if (related.indexOf(link.target) === -1) { related.push(link.target) }
+          }
+        })
+        circle.classed('faded', true)
+        circle
+          .filter((df) => related.indexOf(df) > -1)
+          .classed('highlight', true)
+        path.classed('faded', true)
+        path
+          .filter((df) => df.source === d || df.target === d)
+          .classed('highlight', true)
+        text.classed('faded', true)
+        text
+          .filter((df) => related.indexOf(df) > -1)
+          .classed('highlight', true)
+        // This ensures that tick is called so the node count is updated
+        this.simulation.alphaTarget(0.0001).restart()
+      },
+      nodeMouseOut(d) {
+        const graph = this.selections.graph
+        const circle = graph.selectAll("circle")
+        const path = graph.selectAll("path")
+        const text = graph.selectAll("text")
+
+        circle.classed('faded', false)
+        circle.classed('highlight', false)
+        path.classed('faded', false)
+        path.classed('highlight', false)
+        text.classed('faded', false)
+        text.classed('highlight', false)
+        // This ensures that tick is called so the node count is updated
         this.simulation.restart()
+      },
+      nodeClick(d) {
+        const circle = this.selections.graph.selectAll("circle")
+        circle.classed('selected', false)
+        circle.filter((td) => td === d)
+          .classed('selected', true)
+      },
+    },
+    watch: {
+      data: {
+        handler(newData) {
+          this.updateData()
+        },
+        deep: true
+      },
+      forceProperties: {
+        handler(newForce) {
+          this.updateForces()
+        },
+        deep: true
       }
+    },
+    created() {
+      // You can set the component width and height in any way
+      // you prefer. It's responsive! :)
+      this.width = window.innerWidth - 10
+      this.height = window.innerHeight - 110
+
+      this.simulation = d3.forceSimulation()
+        .force("link", d3.forceLink())
+        .force("charge", d3.forceManyBody())
+        .force("collide", d3.forceCollide())
+        .force("center", d3.forceCenter())
+        .force("forceX", d3.forceX())
+        .force("forceY", d3.forceY())
+        .on("tick", this.tick)
+      // Call first time to setup default values
+      this.updateForces()
     }
-  }
+  };
 </script>
 
 <style>
-  body {
-    font: 16px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
-    Arial, sans-serif;
-  }
-
-  svg {
-    display: block;
-    margin: 0 auto;
-  }
-
-  .decade {
-    transition: transform 0.2s ease-in-out;
-    text-anchor: middle;
-  }
-
-  .decade__circle {
-    transition: r 0.2s ease-in-out;
-  }
-
-  .decade__label {
-    fill: #000000;
-    /*text-shadow:*/
-    /*    -1px -1px 0 #000,*/
-    /*    1px -1px 0 #000,*/
-    /*    -1px 1px 0 #000,*/
-    /*    1px 1px 0 #000;*/
-  }
-
-  .controls {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-  }
-
-  .control {
-    display: inline-flex;
-    flex-direction: column;
-    margin: 0 4px;
-  }
-
-  .control label {
-    font-size: 14px;
-    font-weight: bold;
-    margin-bottom: 4px;
-  }
-
-  .control input {
-    display: block;
-    font: inherit;
-    width: 100px;
-  }
 </style>

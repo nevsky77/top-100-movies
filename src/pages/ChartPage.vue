@@ -9,7 +9,7 @@
 <style>
 </style>
 <script>
-  import Chart from "../components/Chart";
+  import Chart from "../components/ChartComponent";
   import {mapState} from 'vuex'
   export default {
     components: {Chart},
