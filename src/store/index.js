@@ -131,5 +131,10 @@ export default new Vuex.Store({
         commit('setSortedByDecadeMovieList', sortedByDecade);
       }
     }
+  },
+  getters: {
+    getMovieById: state => id => {
+      return state.movieList.find(movie => movie.idIMDB === id);
+    }
   }
 })
