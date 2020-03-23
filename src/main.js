@@ -5,7 +5,11 @@ import store from './store'
 import BootstrapVue from 'bootstrap-vue'
 import ReadMore from 'vue-read-more';
 import cutTitle from './helpers/cutTitle'
+import Paginate from 'vuejs-paginate'
 
+
+
+Vue.component('Paginate', Paginate)
 Vue.directive('cut-title', cutTitle);
 Vue.use(ReadMore);
 Vue.use(BootstrapVue)

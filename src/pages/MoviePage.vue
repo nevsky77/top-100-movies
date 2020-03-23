@@ -1,7 +1,9 @@
 <template>
   <div class="movie-page-wrap">
-      <img :src="movieInfo.urlPoster" alt="moviePoster">
+      <img class="mr-5" :src="movieInfo.urlPoster" alt="moviePoster">
       <div>
+        <span class="text-center d-block"><strong>{{movieInfo.title}}</strong></span>
+        <br>
         <span><strong>Rating: {{movieInfo.rating}}</strong></span>
         <br>
         <span><strong>Year: {{movieInfo.year}}</strong></span>

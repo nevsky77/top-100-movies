@@ -1,8 +1,7 @@
 <template>
     <div class="shadow-sm py-2 h-100 text-center">
       <div class="title">
-<!--        <h5 v-cut-title></h5>-->
-        <router-link tag="h5" :to="{path: `movie/${movieInfo.idIMDB}`}">{{movieInfo.title}}</router-link>
+        <router-link class="cursor-pointer" tag="h5" :to="{path: `movie/${movieInfo.idIMDB}`}">{{movieInfo.title}}</router-link>
       </div>
       <div>
         <img class="image w-75" :src="movieInfo.urlPoster" alt="moviePoster">
@@ -33,6 +32,8 @@
   }
 </script>
 
-<style scoped>
-
+<style scoped lang="scss">
+ .cursor-pointer {
+   cursor: pointer;
+ }
 </style>

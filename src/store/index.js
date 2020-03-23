@@ -25,10 +25,10 @@ export default new Vuex.Store({
     serReverseMoviesList(state, reverseMoviesList) {
       state.sortedMovieList = reverseMoviesList
     },
-    setSortedByDecadeMovieList(state, sortedByDecade){
+    setSortedByDecadeMovieList(state, sortedByDecade) {
       state.sortedMovieList = sortedByDecade
     },
-    setMovieListForChart(state, movieListForChart){
+    setMovieListForChart(state, movieListForChart) {
       state.movieListForChart = movieListForChart
     },
     setMovieListForBubble(state, movieListForBubble) {
@@ -36,13 +36,13 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    async loadMovieList ({ commit, state }) {
+    async loadMovieList({commit, state}) {
       try {
         let fetchMovieList = async () => {
-          let fetchMovies = await axios.get(`${VUE_APP_CORS_URL}/${MOVIE_DB_BASE_URI}/top?start=1&end=100&token=${MOVIE_DB_API_KEY}&format=json&data=0`)
+          let fetchMovies = await axios.get(`${VUE_APP_CORS_URL}/${MOVIE_DB_BASE_URI}/top?start=1&end=100&token=${MOVIE_DB_API_KEY}&format=json&data=1`)
           let {movies: movieList} = fetchMovies.data.data
           movieList.splice(100)
-          commit('setMoviesList', { movieList });
+          commit('setMoviesList', {movieList});
           commit('setSortedByDecadeMovieList', movieList);
         }
         let sortMoviesArrayForCharts = async () => {
@@ -58,7 +58,7 @@ export default new Vuex.Store({
             {decade: '2000-th', min: 2000, max: 2009},
             {decade: '2010-th', min: 2010, max: 2019},
             {decade: '2020-th', min: 2020, max: 2029}
-            ]
+          ]
 
           let movieListForChart = initial.reduce((result, current) => {
             const filteredMovieListForChart = () => {
@@ -113,17 +113,17 @@ export default new Vuex.Store({
         console.info("Film already in favourite list")
       }
     },
-    removeFromFavourite({commit, state}, itemId){
-     let removed = state.favoriteList.filter(movie => movie.idIMDB !== itemId)
+    removeFromFavourite({commit, state}, itemId) {
+      let removed = state.favoriteList.filter(movie => movie.idIMDB !== itemId)
       commit('setNewArray', removed)
     },
-    reverseMoviesList({commit, state}) {
-      let movies = state.sortedMovieList
-      movies.reverse()
-      commit('serReverseMoviesList', movies)
-    },
-    sortMovieListByDecades({commit, state}, decadeValue){
-      if(decadeValue == 'all') {
+    // reverseMoviesList({commit, state}) {
+    //   let movies = state.sortedMovieList
+    //   movies.reverse()
+    //   commit('serReverseMoviesList', movies)
+    // },
+    sortMovieListByDecades({commit, state}, decadeValue) {
+      if (decadeValue == 'all') {
         commit('setSortedByDecadeMovieList', state.movieList);
       } else {
         let max = +decadeValue + 9;
